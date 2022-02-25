@@ -3,6 +3,7 @@ const appBaseUrl = "http://localhost:3000/"
 const imagesContainer = document.querySelector(".images-container")
 const fileInp = document.querySelector("input[type=file]")
 const images = document.querySelectorAll(".image-container img")
+let submitted = false
 
 
 // ----------------------------------------------------
@@ -11,7 +12,12 @@ const images = document.querySelectorAll(".image-container img")
 $("#loginForm").on("submit", async function(e){
     
     e.preventDefault()
-
+    if(submitted) return
+    
+    // submit event is running
+    // so you cant submit twice until its finished
+    submitted = true
+    
     try {
         // Login
         const response = await fetch("/api/v1/auth/login", {
@@ -24,6 +30,7 @@ $("#loginForm").on("submit", async function(e){
         const data = await response.json()
 
         if(!data.success){
+            submitted = false
             return importErrorMessage(data.errMessage)
         }
 
@@ -41,6 +48,8 @@ $("#loginForm").on("submit", async function(e){
 $("#registerForm").on("submit", async function(e){
     
     e.preventDefault()
+    if(submitted) return
+    submitted = true
 
     
     try {
@@ -55,6 +64,7 @@ $("#registerForm").on("submit", async function(e){
         const data = await response.json()
 
         if(!data.success){
+            submitted = false
             return importErrorMessage(data.errMessage)
         }
         
@@ -70,11 +80,13 @@ $("#registerForm").on("submit", async function(e){
 $("#addImageForm").on("submit", async function(e){
 
     e.preventDefault()
-
+    if(submitted) return
+    submitted = true
     
     const imageFile = fileInp.files[0]
     if(!imageFile){
-        return importErrorMessage("Please select an image")
+        submitted = false
+        return importErrorMessage("Please select an image")        
     }
 
     // loading animation
@@ -99,9 +111,10 @@ $("#addImageForm").on("submit", async function(e){
 
          loader.classList.remove("loader-active")
 
-         
+
          if(!data.success){
             loader.classList.remove("loader-active")
+            submitted = false
             return importErrorMessage(data.errMessage)
          }
 
@@ -150,7 +163,7 @@ $(".imageDeleteBtn").on("click", async function(){
 // get and import images one by one
 $(document).ready(async function(){
     if(images){
-        images.forEach(async (image) => {   
+        images.forEach(async (image) => {
             let imageId = image.dataset.imageId
             const imageData = await getImage(imageId)
             image.src = `data:image/jpeg;base64,${imageData.data}`
@@ -198,6 +211,9 @@ function toBase64(file) {
 
 // import success message
 function importSuccessMessage(msg, redirectUrl=null){
+    if(messageBox.classList.contains("error-message")){
+        messageBox.classList.remove("error-message")
+    }
     messageBox.textContent = msg
     messageBox.classList.add("box-active", "success-message")
     if(redirectUrl){
