@@ -4,12 +4,13 @@ const {BadRequestError} = require("../errors/index")
 
 const addImage = asyncWrapper(async (req, res, next) => {
 
-    const imageData = req.body.imageData
-    if(!imageData) throw new BadRequestError("Image is required")
+    const file = req.body.file
+    if(!file) throw new BadRequestError("Image is required")
 
     const image = new Image({
-        data: imageData,
-        ownerId: req.user._id
+        data: file.data,
+        extension: file.extension,
+        ownerId: req.user._id,
     })
 
     // create and save image

@@ -96,7 +96,22 @@ $("#addImageForm").on("submit", async function(e){
     // get image data as base64
     toBase64(imageFile)
      .then(async (res) => {
-         const imageData = res.split(",")[1]
+         const image = res.split(",")
+
+         let file = {data: image[1]}         
+
+         // example -> image/jpeg;base64
+         imageDataType = image[0].split("data:")[1]
+
+         // example -> base64
+         file.type = imageDataType.split(";")[1]
+
+         // example -> image/jpg
+         file.mimeType = imageDataType.split(";")[0]
+
+         // example -> jpg
+         file.extension = file.mimeType.split("/")[1]
+
 
          // send and save image data with post request
          const response = await fetch("/api/v1/images/", {
@@ -104,7 +119,7 @@ $("#addImageForm").on("submit", async function(e){
             headers: {
             'Content-Type': 'application/json'
             },
-            body: JSON.stringify({imageData}) // body data type must match "Content-Type" header
+            body: JSON.stringify({file}) // body data type must match "Content-Type" header
          })
 
          const data =  await response.json()
@@ -166,7 +181,7 @@ $(document).ready(async function(){
         images.forEach(async (image) => {
             let imageId = image.dataset.imageId
             const imageData = await getImage(imageId)
-            image.src = `data:image/jpeg;base64,${imageData.data}`
+            image.src = `data:image/${imageData.extension};base64,${imageData.data}`
             image.parentElement.classList.remove("image-loader")
         });
     }

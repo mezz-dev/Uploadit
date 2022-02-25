@@ -7,12 +7,16 @@ const schema = mongoose.Schema({
         type: String,
         required: true
     },
+    extension: {
+        type: String,
+        required: true,
+    },
     ownerId: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: "User",
         required: true,
     },
-})
+}, {timeStamp: true})
 
 
 
