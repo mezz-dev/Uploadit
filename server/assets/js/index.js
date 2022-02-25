@@ -71,10 +71,15 @@ $("#addImageForm").on("submit", async function(e){
 
     e.preventDefault()
 
+    
     const imageFile = fileInp.files[0]
     if(!imageFile){
         return importErrorMessage("Please select an image")
     }
+
+    // loading animation
+    const loader = this.parentElement.querySelector(".loader")
+    loader.classList.add("loader-active")
 
     // get image data as base64
     toBase64(imageFile)
@@ -91,16 +96,25 @@ $("#addImageForm").on("submit", async function(e){
          })
 
          const data =  await response.json()
+
+         loader.classList.remove("loader-active")
+
+         
          if(!data.success){
+            loader.classList.remove("loader-active")
             return importErrorMessage(data.errMessage)
          }
 
-        importSuccessMessage(data.message, appBaseUrl + "dashboard")
+         importSuccessMessage(data.message, appBaseUrl + "dashboard")
      })
      .catch((err) => {
+         loader.classList.remove("loader-active")
          console.log(err)
          importErrorMessage(err.message)
      })
+
+
+
 })
 // ----------------------------------------------------
 // end FORMS -------------------------------------------
